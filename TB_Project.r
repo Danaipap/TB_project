@@ -8,7 +8,7 @@ library(readr)
 # Due to large number of snp.tab files, we have processed initially each project accession number that we have retrieved from ENA separately. 
 # READ & PROCESS SNP.TAB FILES FROM DATASET_1
 # create a vector/list from all files
-files <- list.files("path_to_snp.tab_files_of_each_project_accession_number”) 
+files <- list.files("path_to_snp.tab_files_of_each_project_accession_number") 
 
 # Annotated with dataset extension
 files <- paste("additional_path_to_dataset1_folder/", files, sep = "")  
