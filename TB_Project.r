@@ -19,6 +19,12 @@ allFiles.list <- lapply(files, read_delim, delim = '\t', col_names = TRUE)
 # combine all data frames by combining the rows, remove duplicate headers
 df <- do.call("rbind", allFiles.list) 
 
+# remove indels
+df <- df[ grep("del", df$TYPE, invert = TRUE) , ]
+df <- df[ grep("ins", df$TYPE, invert = TRUE) , ]
+df <- df[ grep("ins", df$EFFECT, invert = TRUE) , ]
+df <- df[ grep("del", df$EFFECT, invert = TRUE) , ]
+
 # create new dataframe with the columns you need- here we have kept column position, ref &alt ,Ftype, effect, locus_tag, gene and product
 df = df[,c(2,4,5,7,11,12,13,14)] 
 
@@ -103,10 +109,15 @@ intersected_final$SNPs[is.na(intersected_final$SNPs)] <- 0
 # remove intersected dataframe
 rm(intersected)
 
-# create final dataframe, but exclude miscellaneous RNAs, mobile elements, repeat regions and non coding regions
+# create final dataframe, but exclude miscellaneous RNAs, mobile elements, repeat regions, transposases and non coding regions
 df_NC <- intersected[!intersected$GENE=="NON_CODING",]
 df_NO <- df_NC[!df_NC$FTYPE=="tRNA" 
-&!df_NC$FTYPE=="repeat_region"&!df_NC$FTYPE=="mobile_element"&!df_NC$FTYPE=="ncRNA"&!df_NC$FTYPE=="misc_RNA"&!df_NC$FTYPE=="rRNA",]
+&!df_NC$FTYPE=="repeat_region"&!df_NC$FTYPE=="mobile_element"&!df_NC$FTYPE=="ncRNA"&!df_NC$FTYPE=="misc_RNA"&!df_NC$FTYPE=="rRNA"&!df_NC$PRODUCT=="transposase"&!df_NC$PRODUCT=="IS2-like transposase"&!df_NC$PRODUCT=="transposase fusion protein",]
+
+# Remove PE-PPE genes
+df_NO <- df_NO[ grep("PPE", df_NO$PRODUCT, invert = TRUE) , ]
+df_NO <- df_NO[ grep("PE", df_NO$PRODUCT, invert = TRUE) , ]
+df_NO <- df_NO[ grep("PE_PGRS", df_NO$PRODUCT, invert = TRUE) ,] 
 
 # GROUP by Locus_tag to sum the snps per locus tag
 df_final <- df_NO %>% group_by(LOCUS_TAG, GENE, PRODUCT,START, STOP) %>% #  group  per LOCUS_TAG # 
